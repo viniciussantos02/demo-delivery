@@ -12,7 +12,7 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class DeliveruCheckpointService {
+public class DeliveryCheckpointService {
 
     private final DeliveryRepository deliveryRepository;
 
