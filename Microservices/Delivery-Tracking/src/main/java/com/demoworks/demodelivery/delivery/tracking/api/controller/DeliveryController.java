@@ -4,6 +4,8 @@ package com.demoworks.demodelivery.delivery.tracking.api.controller;
 import com.demoworks.demodelivery.delivery.tracking.api.model.CourierIdDTO;
 import com.demoworks.demodelivery.delivery.tracking.api.model.DeliveryDTO;
 import com.demoworks.demodelivery.delivery.tracking.domain.model.Delivery;
+import com.demoworks.demodelivery.delivery.tracking.domain.service.DeliveryCheckpointService;
+import com.demoworks.demodelivery.delivery.tracking.domain.service.DeliveryConsultationService;
 import com.demoworks.demodelivery.delivery.tracking.domain.service.DeliveryPreparationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +24,11 @@ import java.util.UUID;
 public class DeliveryController {
 
     private final DeliveryPreparationService deliveryPreparationService;
+    private final DeliveryCheckpointService deliveryCheckpointService;
+    private final DeliveryConsultationService deliveryConsultationService;
 
     @PostMapping
-    public ResponseEntity<Delivery> deaftDelivery(@Valid @RequestBody DeliveryDTO input) {
+    public ResponseEntity<Delivery> draftDelivery(@Valid @RequestBody DeliveryDTO input) {
         return ResponseEntity.status(HttpStatus.CREATED).body(deliveryPreparationService.draftDelivery(input));
     }
 
@@ -37,26 +41,29 @@ public class DeliveryController {
                           // permitem que os clientes solicitem dados em partes, especificando o número da página e o tamanho da página.
     @GetMapping           // Isso é útil para lidar com grandes conjuntos de dados, evitando sobrecarregar o cliente ou o servidor.
     public ResponseEntity<PagedModel<Delivery>> findallDeliveries(@PageableDefault Pageable pageable) {
-        return ResponseEntity.ok(deliveryPreparationService.findAllDeliveries(pageable));
+        return ResponseEntity.ok(deliveryConsultationService.findAllDeliveries(pageable));
     }
 
     @GetMapping("/{deliveryId}")
     public ResponseEntity<Delivery> findDeliveryById(@PathVariable UUID deliveryId) {
-        return ResponseEntity.ok(deliveryPreparationService.findDeliveryById(deliveryId));
+        return ResponseEntity.ok(deliveryConsultationService.findDeliveryById(deliveryId));
     }
 
     @PostMapping("/{deliveryId}/placement")
     public ResponseEntity<Void> placeDelivery(@PathVariable UUID deliveryId) {
+        deliveryCheckpointService.placeDelivery(deliveryId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{deliveryId}/pickups")
     public ResponseEntity<Void> pickupDelivery(@PathVariable UUID deliveryId, @RequestBody @Valid CourierIdDTO courierId) {
+        deliveryCheckpointService.pickupDelivery(deliveryId, courierId.id());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{deliveryId}/completion")
     public ResponseEntity<Void> completeDelivery(@PathVariable UUID deliveryId) {
+        deliveryCheckpointService.completeDelivery(deliveryId);
         return ResponseEntity.ok().build();
     }
 }

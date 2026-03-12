@@ -1,6 +1,10 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: courier-management
+    port: 8081
   jpa:
     hibernate:
       ddl-auto: update

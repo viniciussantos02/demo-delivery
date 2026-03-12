@@ -47,15 +47,6 @@ public class DeliveryPreparationService {
         return deliveryRepository.saveAndFlush(delivery);
     }
 
-    public PagedModel<Delivery> findAllDeliveries(Pageable pageable) {
-        return new PagedModel<>(deliveryRepository.findAll(pageable));
-    }
-
-    public Delivery findDeliveryById(UUID deliveryId) {
-        return deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY));
-    }
-
     private void handlePrepartion(Delivery delivery, DeliveryDTO input) {
         ContactPointDTO senderInput = input.sender();
         ContactPointDTO recipientInput = input.recipient();
