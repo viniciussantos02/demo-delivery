@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: delivery-tracking
+  jpa:
+    hibernate:
+      ddl-auto: create-drop #Deleta o banco toda vez que iniciar no uso dos testes de integracao
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/deliverydb_test
+    username: postgres
+    password: postgres
