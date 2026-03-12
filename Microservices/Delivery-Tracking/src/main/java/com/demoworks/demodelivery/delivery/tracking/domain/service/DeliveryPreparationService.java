@@ -6,15 +6,15 @@ import com.demoworks.demodelivery.delivery.tracking.domain.model.ContactPoint;
 import com.demoworks.demodelivery.delivery.tracking.domain.model.Delivery;
 import com.demoworks.demodelivery.delivery.tracking.domain.model.exception.DomainException;
 import com.demoworks.demodelivery.delivery.tracking.domain.repository.DeliveryRepository;
+import com.demoworks.demodelivery.delivery.tracking.infrastructure.client.CourierPayoutCalculationClient;
+import com.demoworks.demodelivery.delivery.tracking.infrastructure.client.DeliveryTimeEstimationClient;
+import com.demoworks.demodelivery.delivery.tracking.infrastructure.model.DeliveryEstimate;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -23,6 +23,9 @@ import java.util.UUID;
 public class DeliveryPreparationService {
 
     private final DeliveryRepository deliveryRepository;
+
+    private final DeliveryTimeEstimationClient deliveryTimeEstimationClient;
+    private final CourierPayoutCalculationClient courierPayoutCalculationClient;
 
     //@Transactional garante que a operacao de persistencia seja executada dentro de uma transacao,
     //garantindo a consistencia dos dados e permitindo rollback em caso de falhas.
@@ -69,16 +72,17 @@ public class DeliveryPreparationService {
                 .street(recipientInput.street())
                 .build();
 
-        Duration expectedDeliveryTime = Duration.ofHours(3);
+        DeliveryEstimate deliveryEstimate = deliveryTimeEstimationClient.estimateDeliveryTime(sender, recipient);
 
-        BigDecimal distanceFee = new BigDecimal("10");
-        BigDecimal payout = new BigDecimal("10");
+        BigDecimal payoutForDelivery = courierPayoutCalculationClient.calculateCourierPayoutForDelivery(deliveryEstimate.distanceInKm());
+
+        BigDecimal distanceFee = calculateDistanceFee(deliveryEstimate.distanceInKm());
 
         var preparationDetails = Delivery.PreparationDetails.builder()
                 .recipient(recipient)
                 .sender(sender)
-                .expectedDeliveryTime(expectedDeliveryTime)
-                .courierPayout(payout)
+                .expectedDeliveryTime(deliveryEstimate.estimatedTime())
+                .courierPayout(payoutForDelivery)
                 .distanceFee(distanceFee)
                 .build();
 
@@ -88,5 +92,10 @@ public class DeliveryPreparationService {
             delivery.addItem(item.name(), item.quantity());
         });
 
+    }
+
+    private BigDecimal calculateDistanceFee(Double distanceInKm) {
+        return new BigDecimal("3").multiply(new BigDecimal(distanceInKm))
+                .setScale(2, RoundingMode.HALF_EVEN);
     }
 }
