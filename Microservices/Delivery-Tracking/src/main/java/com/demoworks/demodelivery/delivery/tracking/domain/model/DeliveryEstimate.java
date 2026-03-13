@@ -1,4 +1,4 @@
-package com.demoworks.demodelivery.delivery.tracking.infrastructure.model;
+package com.demoworks.demodelivery.delivery.tracking.domain.model;
 
 import java.time.Duration;
 

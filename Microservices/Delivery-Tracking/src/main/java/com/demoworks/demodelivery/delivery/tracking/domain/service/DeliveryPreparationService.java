@@ -6,16 +6,14 @@ import com.demoworks.demodelivery.delivery.tracking.domain.model.ContactPoint;
 import com.demoworks.demodelivery.delivery.tracking.domain.model.Delivery;
 import com.demoworks.demodelivery.delivery.tracking.domain.model.exception.DomainException;
 import com.demoworks.demodelivery.delivery.tracking.domain.repository.DeliveryRepository;
-import com.demoworks.demodelivery.delivery.tracking.infrastructure.client.CourierPayoutCalculationClient;
-import com.demoworks.demodelivery.delivery.tracking.infrastructure.client.DeliveryTimeEstimationClient;
-import com.demoworks.demodelivery.delivery.tracking.infrastructure.model.DeliveryEstimate;
+import com.demoworks.demodelivery.delivery.tracking.domain.model.DeliveryEstimate;
+import com.demoworks.demodelivery.delivery.tracking.domain.service.impl.DeliveryTimeEstimationServiceMock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Duration;
 import java.util.UUID;
 
 @Service
@@ -24,8 +22,8 @@ public class DeliveryPreparationService {
 
     private final DeliveryRepository deliveryRepository;
 
-    private final DeliveryTimeEstimationClient deliveryTimeEstimationClient;
-    private final CourierPayoutCalculationClient courierPayoutCalculationClient;
+    private final DeliveryTimeEstimationService deliveryTimeEstimationService;
+    private final CourierPayoutCalculationService courierPayoutCalculationService;
 
     //@Transactional garante que a operacao de persistencia seja executada dentro de uma transacao,
     //garantindo a consistencia dos dados e permitindo rollback em caso de falhas.
@@ -72,9 +70,9 @@ public class DeliveryPreparationService {
                 .street(recipientInput.street())
                 .build();
 
-        DeliveryEstimate deliveryEstimate = deliveryTimeEstimationClient.estimateDeliveryTime(sender, recipient);
+        DeliveryEstimate deliveryEstimate = deliveryTimeEstimationService.estimateDeliveryTime(sender, recipient);
 
-        BigDecimal payoutForDelivery = courierPayoutCalculationClient.calculateCourierPayoutForDelivery(deliveryEstimate.distanceInKm());
+        BigDecimal payoutForDelivery = courierPayoutCalculationService.calculateCourierPayoutForDelivery(deliveryEstimate.distanceInKm());
 
         BigDecimal distanceFee = calculateDistanceFee(deliveryEstimate.distanceInKm());
 
