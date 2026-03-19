@@ -1,8 +1,11 @@
 package com.demoworks.demodelivery.courier.management.api.controller;
 
 import com.demoworks.demodelivery.courier.management.api.model.CourierDTO;
+import com.demoworks.demodelivery.courier.management.api.model.CourierPayoutCalculationInput;
+import com.demoworks.demodelivery.courier.management.api.model.CourierPayoutResultModel;
 import com.demoworks.demodelivery.courier.management.domain.model.Courier;
 import com.demoworks.demodelivery.courier.management.domain.service.CourierConsultationService;
+import com.demoworks.demodelivery.courier.management.domain.service.CourierPayoutService;
 import com.demoworks.demodelivery.courier.management.domain.service.CourierRegistrationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController
@@ -22,6 +26,7 @@ public class CourierController {
 
     private final CourierRegistrationService courierRegistrationService;
     private final CourierConsultationService courierConsultationService;
+    private final CourierPayoutService courierPayoutService;
 
     @PostMapping
     public ResponseEntity<Courier> createCourier(@Valid @RequestBody CourierDTO courierInput) {
@@ -41,5 +46,12 @@ public class CourierController {
     @GetMapping("/{courierId}")
     public ResponseEntity<Courier> findCourierById(@PathVariable UUID courierId) {
         return ResponseEntity.ok(courierConsultationService.findCourierById(courierId));
+    }
+
+    @PostMapping("/payout-calculation")
+    public ResponseEntity<CourierPayoutResultModel> calculateCourierPayout(@RequestBody CourierPayoutCalculationInput input) {
+        BigDecimal payoutFee = courierPayoutService.calculatePayout(input.distanceInKm());
+
+        return ResponseEntity.ok(new CourierPayoutResultModel(payoutFee));
     }
 }
