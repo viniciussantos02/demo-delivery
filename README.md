@@ -30,7 +30,7 @@ The project follows a microservices architecture:
 
 ## Prerequisites
 
-- Java 25 or higher
+- Java 25
 - Maven 3.6+
 - Docker and Docker Compose
 
