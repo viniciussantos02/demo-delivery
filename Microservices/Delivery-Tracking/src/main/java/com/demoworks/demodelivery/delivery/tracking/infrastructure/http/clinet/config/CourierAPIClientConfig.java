@@ -14,8 +14,8 @@ public class CourierAPIClientConfig {
     @Value("${courier.api.base-url}")
     private String courierApiBaseUrl;
 
-    @Bean  //Configurando o CourierAPIClient para ser injetado em outros componentes
-           // Dessa forma sempre que for injetado em outras classes ele tera essas configurações pré-definidas
+           //Configurando o CourierAPIClient para ser injetado em outros componentes
+    @Bean  // Dessa forma sempre que for injetado em outras classes ele tera essas configurações pré-definidas
     public CourierAPIClient courierAPIClient(RestClient.Builder builder) {
         RestClient restClient = builder.baseUrl(courierApiBaseUrl).build();
         RestClientAdapter adapter = RestClientAdapter.create(restClient);

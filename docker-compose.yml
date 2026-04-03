@@ -10,7 +10,6 @@ services:
       - 5432:5432
     networks:
       - local-network #Define rede local
-
   pgadmin: #Config para o PGAdmin (Interface administrativa do Postgres)
     image: dpage/pgadmin4:9.11
     depends_on:
@@ -25,9 +24,37 @@ services:
     networks:
       - local-network
 
+  kafka: #Config para o Kafka
+    image: apache/kafka:4.1.1
+    ports:
+      - 9092:9092
+    environment: #Variaveis de ambiente para configuração do Kafka usando ele como broker e controller, com apenas 1 nó(Ideal para aplicacoes pequenas).
+      KAFKA_NODE_ID: 0
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_LISTENERS: PLAINTEXT://:9090,CONTROLLER://:9091,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9090,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9091
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka-data:/apache/kafka
+    networks:
+      - local-network
+  kafka-ui: #Config para o Kafka UI (Interface administrativa do Kafka)
+      image: provectuslabs/kafka-ui:v0.7.2
+      ports:
+        - 8084:8080
+      environment:
+        KAFKA_CLUSTERS_0_NAME: demodelivery-kafka-cluster
+        KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9090
+      networks:
+        - local-network
+
 volumes:
   postgres-data:
   pgadmin-data:
+  kafka-data:
 
 networks:
   local-network:

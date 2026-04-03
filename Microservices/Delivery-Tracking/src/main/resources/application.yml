@@ -12,6 +12,16 @@ spring:
     url: jdbc:postgresql://localhost:5432/deliverydb
     username: postgres
     password: postgres
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: #Mapeamento de eventos para o Kafka, onde a chave é o nome do evento e o valor é a classe do evento correspondente.
+          delivery-placed-event:com.demoworks.demodelivery.delivery.tracking.domain.event.DeliveryPlacedEvent,
+          delivery-picked-up-event:com.demoworks.demodelivery.delivery.tracking.domain.event.DeliveryPickedUpEvent,
+          delivery-fullfilled-event:com.demoworks.demodelivery.delivery.tracking.domain.event.DeliveryFulfilledEvent
 
 courier:
   api.base-url: http://localhost:8081
