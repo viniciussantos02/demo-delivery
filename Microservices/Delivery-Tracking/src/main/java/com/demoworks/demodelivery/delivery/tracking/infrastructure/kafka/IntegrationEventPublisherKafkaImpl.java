@@ -17,7 +17,7 @@ public class IntegrationEventPublisherKafkaImpl implements IntegrationEventPubli
 
     @Override
     public void publish(Object event, String key, String topic) {
-        SendResult<String, Object> result = kafkaTemplate.send(topic, key, event).join();
+        SendResult<String, Object> result = kafkaTemplate.send(topic, key, event).join(); //.join() aqui esta sendo usado apenas para debug, mas o ideal é que nao use ele, para manter a natureza assíncrona do envio da mensagem, ou seja, o método publish nao deve esperar o resultado do envio da mensagem para retornar
         RecordMetadata recordMetadata = result.getRecordMetadata();
         log.info("Message Publish: \n\t Topic: {} \n\t Offset: {}", recordMetadata.topic(), recordMetadata.offset());
     }
