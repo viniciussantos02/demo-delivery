@@ -141,15 +141,20 @@ public class Delivery extends AbstractAggregateRoot<Delivery> {
 
     public void pickUp(UUID courierId) {
         this.setCourierId(courierId);
-        this.changeStatusTo(DeliveryStatus.IN_TRANSIT);
+        if (courierId != null) this.changeStatusTo(DeliveryStatus.IN_TRANSIT);
         this.setAssignedAt(OffsetDateTime.now());
-        registerDeliveryEvent(new DeliveryPickedUpEvent(this.placedAt, this.id)); //Registrando evento de Delivery retirada para entrega
+        registerDeliveryEvent(new DeliveryPickedUpEvent(this.placedAt, this.id, courierId)); //Registrando evento de Delivery retirada para entrega
     }
 
     public void markAsDelivered() {
         this.changeStatusTo(DeliveryStatus.DELIVERED);
         this.setFulfilledAt(OffsetDateTime.now());
         registerDeliveryEvent(new DeliveryFulfilledEvent(this.fulfilledAt, this.id)); //Registrando evento de Delivery entregue
+    }
+
+    public void addDeliveryCourier(UUID courierId) {
+        this.setCourierId(courierId);
+        this.changeStatusTo(DeliveryStatus.IN_TRANSIT);
     }
 
     //Retorna lista que nao pode ser modificada
