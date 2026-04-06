@@ -1,6 +1,11 @@
 server:
   port: 8080
 
+logging:
+  level:
+    org.springframework: INFO
+    com.demoworks: DEBUG
+
 spring:
   application:
     name: delivery-tracking
@@ -23,5 +28,15 @@ spring:
           delivery-picked-up-event:com.demoworks.demodelivery.delivery.tracking.domain.event.DeliveryPickedUpEvent,
           delivery-fullfilled-event:com.demoworks.demodelivery.delivery.tracking.domain.event.DeliveryFulfilledEvent
 
+#Configurações para o cliente Eureka, que é usado para registro e descoberta de serviços em um ambiente de microserviços.
+eureka:
+  client:
+    server-url:
+      default-zone: http://localhost:8761/eureka/ #URL do servidor Eureka para registro do serviço
+  instance:
+    instance-id: ${random.value}
+    prefer-ip-address: true
+
+#Variaveis de ambiente do sistema
 courier:
-  api.base-url: http://localhost:8081
+  api.base-instance-url: http://courier-management

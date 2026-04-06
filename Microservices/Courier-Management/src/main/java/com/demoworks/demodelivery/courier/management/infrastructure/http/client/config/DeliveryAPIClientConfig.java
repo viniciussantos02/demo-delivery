@@ -16,7 +16,7 @@ public class DeliveryAPIClientConfig {
     private String courierApiBaseInstanceUrl;
 
     @Bean
-    @LoadBalanced // Habilita o balanceamento de carga para o RestClient, permitindo que ele resolva o nome do serviço e distribua as requisições entre as instâncias disponíveis
+    @LoadBalanced // Habilita o load balance para o RestClient, permitindo que ele resolva o nome do serviço e distribua as requisições entre as instâncias disponíveis
     public RestClient.Builder loadBalancedRestClientBuilder() {
         return RestClient.builder();
     }
