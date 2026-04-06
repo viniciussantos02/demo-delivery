@@ -1,8 +1,12 @@
 package com.demoworks.demodelivery.delivery.tracking.domain.model;
 
+import com.demoworks.demodelivery.delivery.tracking.domain.event.DeliveryFulfilledEvent;
+import com.demoworks.demodelivery.delivery.tracking.domain.event.DeliveryPickedUpEvent;
+import com.demoworks.demodelivery.delivery.tracking.domain.event.DeliveryPlacedEvent;
 import com.demoworks.demodelivery.delivery.tracking.domain.model.exception.DomainException;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.domain.AbstractAggregateRoot;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -21,12 +25,12 @@ import static java.util.Objects.nonNull;
 
 //Usado para comparacao de objetos do mesmo tipo usando .equals().
 // Dessa forma somente o atributo anotado com .Include sera usado para comparacao
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Setter(AccessLevel.PRIVATE)
 @Getter
 @Entity
-public class Delivery {
+public class Delivery extends AbstractAggregateRoot<Delivery> {
 
     @Id
     @EqualsAndHashCode.Include //Apenas esse atributo sera usado em comparacao de objetos Delivery
@@ -132,17 +136,20 @@ public class Delivery {
 
         this.changeStatusTo(DeliveryStatus.WAITING_FOR_COURIER);
         this.setPlacedAt((OffsetDateTime.now()));
+        registerDeliveryEvent(new DeliveryPlacedEvent(this.placedAt, this.id)); //Registrando evento de Delivery criada
     }
 
     public void pickUp(UUID courierId) {
         this.setCourierId(courierId);
         this.changeStatusTo(DeliveryStatus.IN_TRANSIT);
         this.setAssignedAt(OffsetDateTime.now());
+        registerDeliveryEvent(new DeliveryPickedUpEvent(this.placedAt, this.id)); //Registrando evento de Delivery retirada para entrega
     }
 
     public void markAsDelivered() {
         this.changeStatusTo(DeliveryStatus.DELIVERED);
         this.setFulfilledAt(OffsetDateTime.now());
+        registerDeliveryEvent(new DeliveryFulfilledEvent(this.fulfilledAt, this.id)); //Registrando evento de Delivery entregue
     }
 
     //Retorna lista que nao pode ser modificada
@@ -180,6 +187,10 @@ public class Delivery {
         }
 
         this.setStatus(newStatus);
+    }
+
+    private <T> void registerDeliveryEvent(T event) {
+        super.registerEvent(event);
     }
 
     @Getter
