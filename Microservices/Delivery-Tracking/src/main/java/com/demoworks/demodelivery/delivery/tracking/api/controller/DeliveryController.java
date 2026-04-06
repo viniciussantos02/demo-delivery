@@ -1,12 +1,13 @@
 package com.demoworks.demodelivery.delivery.tracking.api.controller;
 
 
-import com.demoworks.demodelivery.delivery.tracking.api.model.CourierIdDTO;
 import com.demoworks.demodelivery.delivery.tracking.api.model.DeliveryDTO;
+import com.demoworks.demodelivery.delivery.tracking.api.model.DeliveryDetailsDTO;
 import com.demoworks.demodelivery.delivery.tracking.domain.model.Delivery;
 import com.demoworks.demodelivery.delivery.tracking.domain.service.DeliveryCheckpointService;
 import com.demoworks.demodelivery.delivery.tracking.domain.service.DeliveryConsultationService;
 import com.demoworks.demodelivery.delivery.tracking.domain.service.DeliveryPreparationService;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,10 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryPreparationService.editDelivery(deliveryId, input));
     }
 
+    @PutMapping("/{deliveryId}/add-delivery-courier")
+    public ResponseEntity<Delivery> addDeliveryCourier(@PathVariable UUID deliveryId, @Valid @RequestBody DeliveryDetailsDTO input) {
+        return ResponseEntity.ok(deliveryPreparationService.addDeliveryCourier(deliveryId, input.courierId()));
+    }
                           //Recursos de paginanção do Spring Data, como Pageable e PagedModel,
                           // permitem que os clientes solicitem dados em partes, especificando o número da página e o tamanho da página.
     @GetMapping           // Isso é útil para lidar com grandes conjuntos de dados, evitando sobrecarregar o cliente ou o servidor.
@@ -56,8 +61,8 @@ public class DeliveryController {
     }
 
     @PostMapping("/{deliveryId}/pickups")
-    public ResponseEntity<Void> pickupDelivery(@PathVariable UUID deliveryId, @RequestBody @Valid CourierIdDTO courierId) {
-        deliveryCheckpointService.pickupDelivery(deliveryId, courierId.id());
+    public ResponseEntity<Void> pickupDelivery(@PathVariable UUID deliveryId, @RequestParam @Nullable UUID courierId) {
+        deliveryCheckpointService.pickupDelivery(deliveryId, courierId);
         return ResponseEntity.ok().build();
     }
 

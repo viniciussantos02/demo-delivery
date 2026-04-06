@@ -4,4 +4,4 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /* Essa é uma classe de evento da Delivery */
-public record DeliveryPickedUpEvent(OffsetDateTime occurredAt, UUID deliveryId) {}
+public record DeliveryPickedUpEvent(OffsetDateTime occurredAt, UUID deliveryId, UUID courierId) {}

@@ -2,12 +2,14 @@ package com.demoworks.demodelivery.delivery.tracking.domain.service;
 
 import com.demoworks.demodelivery.delivery.tracking.api.model.ContactPointDTO;
 import com.demoworks.demodelivery.delivery.tracking.api.model.DeliveryDTO;
+import com.demoworks.demodelivery.delivery.tracking.api.model.DeliveryDetailsDTO;
 import com.demoworks.demodelivery.delivery.tracking.domain.model.ContactPoint;
 import com.demoworks.demodelivery.delivery.tracking.domain.model.Delivery;
 import com.demoworks.demodelivery.delivery.tracking.domain.model.exception.DomainException;
 import com.demoworks.demodelivery.delivery.tracking.domain.repository.DeliveryRepository;
 import com.demoworks.demodelivery.delivery.tracking.domain.model.DeliveryEstimate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DeliveryPreparationService {
@@ -42,6 +45,23 @@ public class DeliveryPreparationService {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(DomainException::new);
 
+        delivery.removeItems();
+        handlePrepartion(delivery, input);
+        return deliveryRepository.saveAndFlush(delivery);
+    }
+
+    @Transactional
+    public Delivery addDeliveryCourier(UUID deliveryId, UUID courierId) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(DomainException::new);
+
+        log.info("Adding courier {} to delivery {}", courierId, deliveryId);
+        delivery.addDeliveryCourier(courierId);
+        return deliveryRepository.saveAndFlush(delivery);
+    }
+
+
+    public Delivery editDelivery(Delivery delivery, DeliveryDTO input) {
         delivery.removeItems();
         handlePrepartion(delivery, input);
         return deliveryRepository.saveAndFlush(delivery);

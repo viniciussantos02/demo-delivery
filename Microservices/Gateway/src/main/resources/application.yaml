@@ -1,0 +1,41 @@
+server:
+    port: 9999
+
+spring:
+  application.name: gateway
+  cloud:
+    gateway.server.webflux: #Configuração para usar WebFlux pra mapemento de rotas no gateway
+      routes:
+        - id: delivery-tracking-route
+          uri: lb://delivery-tracking #lb:// é usado para indicar que o serviço deve ser resolvido usando o load balance do Eureka
+          predicates:
+            - Path=/api/v1/deliveries/**
+            - Method=GET,POST,PUT,DELETE,OPTIONS
+        - id: delivery-management-route
+          uri: lb://courier-management
+          predicates:
+            - Path=/api/v1/couriers/**
+            - Method=GET,POST,PUT,DELETE,OPTIONS
+        - id: delivery-management-public-route #Configuracao para redirecionar as requisições do endpoint público para o endpoint interno do serviço
+          uri: lb://courier-management
+          predicates:
+            - Path=/public/couriers
+            - Method=GET
+          filters:
+            - RewritePath=/public/couriers, /api/v1/couriers
+            - RemoveJsonAttributesResponseBody=pendingDeliveries,pendingDeliveriesQuantity,phone,true #Config para remover campos especificos dos responses dos endpoints
+        - id: delivery-management-public-segments-route
+          uri: lb://courier-management
+          predicates:
+            - Path=/public/couriers/**
+            #- Header=Authorization, Bearer .+ #Exemplo de como exigir na rota o envio de um header
+            - Method=GET
+          filters: #Configuração para redirecionar as requisições do endpoint público para o endpoint interno do serviço, mantendo os segmentos da URL
+            - RewritePath=/public/couriers/?(?<segment>.*), /api/v1/couriers/$\{segment}
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: true
+    service-url:
+        defaultZone: http://localhost:8761/eureka/

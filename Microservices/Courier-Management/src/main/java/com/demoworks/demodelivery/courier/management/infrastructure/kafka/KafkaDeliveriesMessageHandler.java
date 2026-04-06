@@ -2,7 +2,7 @@ package com.demoworks.demodelivery.courier.management.infrastructure.kafka;
 
 import com.demoworks.demodelivery.courier.management.domain.service.CourierDeliveryService;
 import com.demoworks.demodelivery.courier.management.infrastructure.event.DeliveryFulfilledIntegrationEvent;
-import com.demoworks.demodelivery.courier.management.infrastructure.event.DeliveryPlacedIntegrationEvent;
+import com.demoworks.demodelivery.courier.management.infrastructure.event.DeliveryPickUpIntegrationEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -26,14 +26,14 @@ public class KafkaDeliveriesMessageHandler {
     }
 
     @KafkaHandler
-    public void handle(@Payload DeliveryPlacedIntegrationEvent event) {
+    public void handle(@Payload DeliveryPickUpIntegrationEvent event) {
         log.info("Received event: {}", event);
-        courierDeliveryService.assign(event.getDeliveryId());
+        courierDeliveryService.assign(event.deliveryId(), event.courierId());
     }
 
     @KafkaHandler
     public void handle(@Payload DeliveryFulfilledIntegrationEvent event) {
         log.info("Received event: {}", event);
-        courierDeliveryService.fulfill(event.getDeliveryId());
+        courierDeliveryService.fulfill(event.deliveryId());
     }
 }

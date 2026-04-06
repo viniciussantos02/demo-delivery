@@ -1,6 +1,11 @@
 server:
   port: 8081
 
+logging:
+  level:
+    org.springframework: INFO
+    com.demoworks: DEBUG
+
 spring:
   application:
     name: courier-management
@@ -21,7 +26,20 @@ spring:
       properties:                                 #Tenta primeiro desserializar a mensagem usando o JsonDeserializer, e se falhar, cai no ErrorHandlingDeserializer, que pode lidar com erros de desserialização.
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: '*'
-        spring.json.type.mapping:
+        spring.json.type.mapping: #Define o mapeamento de tipos para os eventos que serão consumidos. Isso é necessário para que o JsonDeserializer saiba qual classe usar para desserializar cada tipo de evento.
           delivery-placed-event:com.demoworks.demodelivery.courier.management.infrastructure.event.DeliveryPlacedIntegrationEvent,
-          delivery-picked-up-event:com.fasterxml.jackson.databind.JsonNode,
+          delivery-picked-up-event:com.demoworks.demodelivery.courier.management.infrastructure.event.DeliveryPickUpIntegrationEvent,
           delivery-fullfilled-event:com.demoworks.demodelivery.courier.management.infrastructure.event.DeliveryFulfilledIntegrationEvent
+
+#Configurações para o cliente Eureka, que é usado para registro e descoberta de serviços em um ambiente de microserviços.
+eureka:
+  client:
+    server-url:
+      default-zone: http://localhost:8761/eureka/ #URL do servidor Eureka para registro do serviço
+  instance:
+    instance-id: ${random.value}
+    prefer-ip-address: true
+
+#Variaveis de ambiente do sistema
+delivery:
+  api.base-instance-url: http://delivery-tracking #URL base da API de delivery que esta cadastrada no Eureka.
