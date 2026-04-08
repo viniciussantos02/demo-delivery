@@ -5,12 +5,33 @@ spring:
   application.name: gateway
   cloud:
     gateway.server.webflux: #Configuração para usar WebFlux pra mapemento de rotas no gateway
+      httpClient: #Configuracao de timeouts para as requisicoes
+        connect-timeout: 10 #ms
+        response-timeout: 300ms
       routes:
         - id: delivery-tracking-route
           uri: lb://delivery-tracking #lb:// é usado para indicar que o serviço deve ser resolvido usando o load balance do Eureka
           predicates:
             - Path=/api/v1/deliveries/**
             - Method=GET,POST,PUT,DELETE,OPTIONS
+          filters:
+            - name: Retry #Configuracao para retry no api gateway
+              args:
+                retries: 3
+                statuses: INTERNAL_SERVER_ERROR, BAD_GATEWAY
+                methods: GET, PUT, DELETE
+                backoff:
+                  firstBackoff: 10ms
+                  maxBackoff: 30ms
+                  factor: 2
+                timeout: 400ms
+            - name: CircuitBreaker #Configuracao para o circuitbreaker dentro do api gateway
+              args:
+                name: delivery-tracking-route-circuit-breaker
+                statusCode:
+                  - 500
+                  - 502
+                  - 504
         - id: delivery-management-route
           uri: lb://courier-management
           predicates:
@@ -39,3 +60,18 @@ eureka:
     fetch-registry: true
     service-url:
         defaultZone: http://localhost:8761/eureka/
+
+resilience4j:
+  circuitbreaker:
+    configs: #Configuracao para o circuit braker (baseada emc ontagem), que diz que se 10 chamadas forem feitas e 5 falharem (50%) entao o circuito é aberto
+      default:
+        slidingWindowType: COUNT_BASED #TIME_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 10000
+    instances:
+      delivery-tracking-route-circuit-breaker:
+        baseConfig: default
+        waitDurationInOpenState: 5000

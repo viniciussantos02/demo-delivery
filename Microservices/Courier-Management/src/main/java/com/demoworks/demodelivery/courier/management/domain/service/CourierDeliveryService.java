@@ -4,10 +4,14 @@ import com.demoworks.demodelivery.courier.management.domain.model.Courier;
 import com.demoworks.demodelivery.courier.management.domain.repository.CourierRepository;
 import com.demoworks.demodelivery.courier.management.infrastructure.http.client.DeliveryAPIClient;
 import com.demoworks.demodelivery.courier.management.infrastructure.http.client.DeliveryDTO;
+import com.demoworks.demodelivery.courier.management.infrastructure.http.client.exception.BadGatewayException;
+import com.demoworks.demodelivery.courier.management.infrastructure.http.client.exception.GatewayTimeoutException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.util.UUID;
 
@@ -26,9 +30,14 @@ public class CourierDeliveryService {
         courier.assign(deliveryId);
 
         if (courierId == null) {
-            //TODO pode ser adicionado um try catch aqui para lidar com erros retornados do servico de delivery, e nesse nao atribuir a entrega ao courier
-            var delivery = deliveryAPIClient.editDelivery(new DeliveryDTO(courier.getId()), deliveryId);
-            log.info("Delivery {} status updated to IN_TRANSIT with courier {}", deliveryId, delivery.courierId());
+            try {
+                var delivery = deliveryAPIClient.editDelivery(new DeliveryDTO(courier.getId()), deliveryId);
+                log.info("Delivery {} status updated to IN_TRANSIT with courier {}", deliveryId, delivery.courierId());
+            } catch (ResourceAccessException e) {
+                throw new GatewayTimeoutException(e);
+            } catch (HttpServerErrorException | IllegalArgumentException e) {
+                throw new BadGatewayException(e);
+            }
         }
 
         courierRepository.saveAndFlush(courier);
