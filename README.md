@@ -194,7 +194,7 @@ Este projeto serve como uma referência prática e educacional para:
 ## 💻 Tecnologias Utilizadas
 
 ### Linguagem & Framework
-- **Java 25**: Linguagem de programação
+- **Java 21**: Linguagem de programação
 - **Spring Boot 3.5.9**: Framework principal para criação de aplicações
 - **Spring Cloud 2025.0.0**: Ferramentas para microsserviços
 
