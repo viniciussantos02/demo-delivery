@@ -233,7 +233,7 @@ Este projeto serve como uma referência prática e educacional para:
 
 Antes de começar, certifique-se de ter instalado:
 
-- **Java 25**: [Download](https://www.oracle.com/java/technologies/downloads/)
+- **Java 21**: [Download](https://www.oracle.com/java/technologies/downloads/)
 - **Maven 3.6+**: [Download](https://maven.apache.org/download.cgi)
 - **Docker**: [Download](https://www.docker.com/products/docker-desktop)
 - **Docker Compose**: Geralmente incluído com Docker Desktop
