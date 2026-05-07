@@ -43,3 +43,15 @@ eureka:
 #Variaveis de ambiente do sistema
 delivery:
   api.base-instance-url: http://delivery-tracking #URL base da API de delivery que esta cadastrada no Eureka.
+
+# Configurações do SpringDoc OpenAPI (Swagger)
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    tagsSorter: alpha
+    operationsSorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  show-actuator: false
+

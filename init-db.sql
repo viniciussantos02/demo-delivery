@@ -1,0 +1,2 @@
+CREATE DATABASE deliverydb;
+CREATE DATABASE courierdb;

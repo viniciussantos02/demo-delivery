@@ -69,3 +69,14 @@ resilience4j:
 #Variaveis de ambiente do sistema
 courier:
   api.base-instance-url: http://courier-management
+
+# Configurações do SpringDoc OpenAPI (Swagger)
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    tagsSorter: alpha
+    operationsSorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  show-actuator: false
